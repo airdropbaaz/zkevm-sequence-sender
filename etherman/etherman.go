@@ -718,7 +718,7 @@ func (etherMan *Client) WaitTxToBeMined(ctx context.Context, tx *types.Transacti
 
 // EstimateGasSequenceBatches estimates gas for sending batches
 func (etherMan *Client) EstimateGasSequenceBatches(sender common.Address, sequences []ethmanTypes.Sequence, maxSequenceTimestamp uint64, initSequenceBatchNumber uint64, l2Coinbase common.Address) (*types.Transaction, error) {
-	opts, err := etherMan.getAuthByAddress(sender)
+	opts, err := etherMan.GetAuthByAddress(sender)
 	if err == ErrNotFound {
 		return nil, ErrPrivateKeyNotFound
 	}
@@ -734,7 +734,7 @@ func (etherMan *Client) EstimateGasSequenceBatches(sender common.Address, sequen
 
 // BuildSequenceBatchesTxData builds a []bytes to be sent to the PoE SC method SequenceBatches.
 func (etherMan *Client) BuildSequenceBatchesTxData(sender common.Address, sequences []ethmanTypes.Sequence, maxSequenceTimestamp uint64, lastSequencedBatchNumber uint64, l2Coinbase common.Address) (to *common.Address, data []byte, err error) {
-	opts, err := etherMan.getAuthByAddress(sender)
+	opts, err := etherMan.GetAuthByAddress(sender)
 	if err == ErrNotFound {
 		return nil, nil, fmt.Errorf("failed to build sequence batches, err: %w", ErrPrivateKeyNotFound)
 	}
@@ -1414,7 +1414,7 @@ func (etherMan *Client) GetTxReceipt(ctx context.Context, txHash common.Hash) (*
 
 // ApprovePol function allow to approve tokens in pol smc
 func (etherMan *Client) ApprovePol(ctx context.Context, account common.Address, polAmount *big.Int, to common.Address) (*types.Transaction, error) {
-	opts, err := etherMan.getAuthByAddress(account)
+	opts, err := etherMan.GetAuthByAddress(account)
 	if err == ErrNotFound {
 		return nil, errors.New("can't find account private key to sign tx")
 	}
@@ -1515,7 +1515,7 @@ func (etherMan *Client) CheckTxWasMined(ctx context.Context, txHash common.Hash)
 
 // SignTx tries to sign a transaction accordingly to the provided sender
 func (etherMan *Client) SignTx(ctx context.Context, sender common.Address, tx *types.Transaction) (*types.Transaction, error) {
-	auth, err := etherMan.getAuthByAddress(sender)
+	auth, err := etherMan.GetAuthByAddress(sender)
 	if err == ErrNotFound {
 		return nil, ErrPrivateKeyNotFound
 	}
@@ -1600,8 +1600,8 @@ func newAuthFromKeystore(path, password string, chainID uint64) (bind.TransactOp
 	return *auth, nil
 }
 
-// getAuthByAddress tries to get an authorization from the authorizations map
-func (etherMan *Client) getAuthByAddress(addr common.Address) (bind.TransactOpts, error) {
+// GetAuthByAddress tries to get an authorization from the authorizations map
+func (etherMan *Client) GetAuthByAddress(addr common.Address) (bind.TransactOpts, error) {
 	auth, found := etherMan.auth[addr]
 	if !found {
 		return bind.TransactOpts{}, ErrNotFound
